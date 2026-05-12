@@ -3104,6 +3104,20 @@ def Clog2BIOp : Builtin<"clog2", [SameOperandsAndResultType]> {
   let assemblyFormat = "$value attr-dict `:` type($value)";
 }
 
+def CountOnesBIOp : Builtin<"countones", [SameOperandsAndResultType]> {
+  let summary = "Count the number of set bits (ones)";
+  let description = [{
+    Counts the number of bits set to 1 in the input value and returns the count.
+
+    See IEEE 1800-2017 § 20.9 "Bit vector system functions".
+  }];
+  let arguments = (ins IntType:$value);
+  let results = (outs IntType:$result);
+  let assemblyFormat = "$value attr-dict `:` type($value)";
+}
+
+
+
 def LnBIOp : RealMathFunc<"ln"> {
   let summary = "Natural logarithm";
 }

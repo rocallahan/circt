@@ -2931,6 +2931,21 @@ struct DisplayBIOpConversion : public OpConversionPattern<DisplayBIOp> {
   }
 };
 
+struct CountOnesBIOpConversion : public OpConversionPattern<CountOnesBIOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(CountOnesBIOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto resultType = getTypeConverter()->convertType(op.getType());
+    if (!resultType)
+      return failure();
+    rewriter.replaceOpWithNewOp<comb::PopcountOp>(op, resultType,
+                                                  adaptor.getValue());
+    return success();
+  }
+};
+
 } // namespace
 
 //===----------------------------------------------------------------------===//
@@ -3477,6 +3492,7 @@ static void populateOpConversion(ConversionPatternSet &patterns,
     FormatIntOpConversion,
     FormatRealOpConversion,
     DisplayBIOpConversion,
+    CountOnesBIOpConversion,
 
     // Dynamic string operations
     StringLenOpConversion,

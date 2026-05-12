@@ -238,6 +238,9 @@ func.func @Expressions(%arg0: !moore.i1, %arg1: !moore.l1, %arg2: !moore.i6, %ar
   // CHECK-NEXT: comb.parity %arg1 : i1
   moore.reduce_xor %arg1 : !moore.l1 -> !moore.l1
 
+  // CHECK-NEXT: comb.popcount %arg2 : (i6) -> i6
+  moore.builtin.countones %arg2 : !moore.i6
+
   // CHECK-NEXT: [[V28:%.+]] = hw.constant 0 : i6
   // CHECK-NEXT: comb.icmp ne %arg2, [[V28]] : i6
   moore.bool_cast %arg2 : !moore.i6 -> !moore.i1
