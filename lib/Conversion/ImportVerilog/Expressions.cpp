@@ -3196,6 +3196,18 @@ Value Context::convertSystemCall(
     return moore::Clog2BIOp::create(builder, loc, value);
   }
 
+  if (name == "$countones" || nameId == ksn::CountOnes) {
+    // Slang already checks the arity of `$countones`.
+    assert(numArgs == 1 && "`$countones` takes 1 argument");
+    auto value = convertRvalueExpression(*args[0]);
+    if (!value)
+      return {};
+    value = convertToSimpleBitVector(value);
+    if (!value)
+      return {};
+    return moore::CountOnesBIOp::create(builder, loc, value);
+  }
+
   // Real math functions (all take 1 real argument)
   if (nameId == ksn::Ln)
     return convertRealMathBI<moore::LnBIOp>(*this, loc, name, args);

@@ -259,6 +259,11 @@ function void MathBuiltins(int x, logic [41:0] y, real r);
   // CHECK: moore.builtin.clog2 [[Y]] : l42
   dummyA($clog2(y));
 
+  // CHECK: moore.builtin.countones [[X]] : i32
+  dummyA($countones(x));
+  // CHECK: moore.builtin.countones [[Y]] : l42
+  dummyA($countones(y));
+
   // CHECK:  moore.builtin.ln [[R]] : f64
   dummyB($ln(r));
   // CHECK:  moore.builtin.log10 [[R]] : f64
