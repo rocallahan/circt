@@ -34,13 +34,15 @@ hw.module @no_ports() {
 // CHECK-NEXT:    output [1:0]  orvout,
 // CHECK-NEXT:    output [7:0]  out_reverse,
 // CHECK-NEXT:           [63:0] outTime,
-// CHECK-NEXT:           [31:0] outSTime
+// CHECK-NEXT:           [31:0] outSTime,
+// CHECK-NEXT:                  outPop
 // CHECK-NEXT:  );
 hw.module @Expressions(in %in8: i8, in %in4: i4, in %clock: i1,
   out out1a: i1, out out1b: i1, out out1c: i1,
   out out1d: i1, out out1e: i1, out out1f: i1, out out1g: i1,
   out out4: i4, out out4s: i4, out out16: i16, out out16s: i16,
-  out sext17: i17, out orvout: i2, out out_reverse: i8, out outTime: i64, out outSTime:i32) {
+  out sext17: i17, out orvout: i2, out out_reverse: i8, out outTime: i64, out outSTime:i32, out outPop: i32) {
+
   %c1_i4 = hw.constant 1 : i4
   %c2_i4 = hw.constant 2 : i4
   %c3_i4 = hw.constant 3 : i4
@@ -162,7 +164,10 @@ hw.module @Expressions(in %in8: i8, in %in4: i4, in %clock: i1,
   // CHECK-DAG: assign outSTime = $stime;
   %stime = sv.system.stime : i32
 
-  hw.output %p_res, %and_res, %or_res, %cmp3, %cmp4, %cmp5, %cmp6, %w1_use, %11, %w2_use, %w3_use, %35, %orv, %rev8, %time, %stime : i1, i1, i1, i1, i1, i1, i1, i4, i4, i16, i16, i17, i2, i8, i64, i32
+  // CHECK-DAG: assign outPop = $countones(in4);
+  %pop = comb.popcount %in4 : (i4) -> i32
+
+  hw.output %p_res, %and_res, %or_res, %cmp3, %cmp4, %cmp5, %cmp6, %w1_use, %11, %w2_use, %w3_use, %35, %orv, %rev8, %time, %stime, %pop : i1, i1, i1, i1, i1, i1, i1, i4, i4, i16, i16, i17, i2, i8, i64, i32, i32
 }
 
 // CHECK-LABEL: module Precedence(

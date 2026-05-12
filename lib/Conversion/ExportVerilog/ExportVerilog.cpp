@@ -2457,6 +2457,7 @@ private:
   // SystemVerilog spec 11.8.1: "Reduction operator results are unsigned,
   // regardless of the operands."
   SubExprInfo visitComb(ParityOp op) { return emitUnary(op, "^", true); }
+  SubExprInfo visitComb(PopcountOp op);
 
   SubExprInfo visitComb(ReplicateOp op);
   SubExprInfo visitComb(ConcatOp op);
@@ -3339,6 +3340,18 @@ SubExprInfo ExprEmitter::visitComb(ReverseOp op) {
 
   return {Symbol, IsUnsigned};
 }
+
+SubExprInfo ExprEmitter::visitComb(PopcountOp op) {
+  if (hasSVAttributes(op))
+    emitError(op, "SV attributes emission is unimplemented for the op");
+
+  ps << "$countones(";
+  emitSubExpr(op.getInput(), LowestPrecedence);
+  ps << ")";
+
+  return {Symbol, IsUnsigned};
+}
+
 
 SubExprInfo ExprEmitter::printStructCreate(
     ArrayRef<hw::detail::FieldInfo> fieldInfos,

@@ -356,3 +356,17 @@ def ReverseOp : CombOp<"reverse", [
 
   let assemblyFormat = "$input attr-dict `:` type($input)";
 }
+
+def PopcountOp : CombOp<"popcount", [Pure]> {
+  let summary = "Count the number of set bits (ones)";
+  let description = [{
+    Counts the number of bits set to 1 in the input value and returns the count.
+    The result can be any integer type.
+
+    Example:
+      %0 = comb.popcount %in : i32
+  }];
+  let arguments = (ins HWIntegerType:$input);
+  let results = (outs HWIntegerType:$result);
+  let assemblyFormat = "$input attr-dict `:` functional-type($input, $result)";
+}

@@ -1242,6 +1242,53 @@ struct CombParityOpConversion : OpConversionPattern<ParityOp> {
   }
 };
 
+struct CombPopcountOpConversion : OpConversionPattern<PopcountOp> {
+  using OpConversionPattern<PopcountOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(PopcountOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto loc = op.getLoc();
+    auto resultType = op.getType();
+    auto width = resultType.getIntOrFloatBitWidth();
+    if (width == 0) {
+      replaceOpWithNewOpAndCopyNamehint<hw::ConstantOp>(rewriter, op,
+                                                        resultType, 0);
+      return success();
+    }
+
+    auto bits = extractBits(rewriter, adaptor.getInput());
+    if (bits.empty()) {
+      replaceOpWithNewOpAndCopyNamehint<hw::ConstantOp>(rewriter, op,
+                                                        resultType, 0);
+      return success();
+    }
+
+    // Zero-extend each bit to resultType.
+    SmallVector<Value> extendedBits;
+    extendedBits.reserve(bits.size());
+    if (width == 1) {
+      extendedBits = std::move(bits);
+    } else {
+      auto zeroTy = rewriter.getIntegerType(width - 1);
+      auto zero = hw::ConstantOp::create(rewriter, loc, zeroTy, 0);
+      for (auto bit : bits) {
+        extendedBits.push_back(
+            rewriter.createOrFold<comb::ConcatOp>(loc, zero, bit));
+      }
+    }
+
+    // Sum all bits together using comb::AddOp.
+    if (extendedBits.size() == 1) {
+      replaceOpAndCopyNamehint(rewriter, op, extendedBits[0]);
+    } else {
+      replaceOpWithNewOpAndCopyNamehint<comb::AddOp>(rewriter, op, extendedBits,
+                                                     /*twoState=*/true);
+    }
+    return success();
+  }
+};
+
 struct CombShlOpConversion : OpConversionPattern<comb::ShlOp> {
   using OpConversionPattern<comb::ShlOp>::OpConversionPattern;
 
@@ -1362,7 +1409,7 @@ populateCombToAIGConversionPatterns(RewritePatternSet &patterns,
   patterns.add<
       // Bitwise Logical Ops
       CombAndOpConversion, CombMuxOpConversion, CombParityOpConversion,
-      CombXorOpToSynthConversion,
+      CombPopcountOpConversion, CombXorOpToSynthConversion,
       // Arithmetic Ops
       CombMulOpConversion, CombICmpOpConversion,
       // Shift Ops

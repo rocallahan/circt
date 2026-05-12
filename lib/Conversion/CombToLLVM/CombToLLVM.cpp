@@ -63,6 +63,36 @@ struct CombReverseOpConversion
   }
 };
 
+/// Convert a comb::PopcountOp to the LLVM dialect.
+struct CombPopcountOpConversion
+    : public ConvertOpToLLVMPattern<comb::PopcountOp> {
+  using ConvertOpToLLVMPattern<comb::PopcountOp>::ConvertOpToLLVMPattern;
+
+  LogicalResult
+  matchAndRewrite(comb::PopcountOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto input = adaptor.getInput();
+    auto resultType = typeConverter->convertType(op.getType());
+    if (!resultType)
+      return failure();
+
+    auto popCount =
+        rewriter.create<LLVM::CtPopOp>(op.getLoc(), input.getType(), input);
+
+    auto inputWidth = cast<IntegerType>(input.getType()).getWidth();
+    auto resultWidth = cast<IntegerType>(resultType).getWidth();
+
+    if (resultWidth < inputWidth) {
+      rewriter.replaceOpWithNewOp<LLVM::TruncOp>(op, resultType, popCount);
+    } else if (resultWidth > inputWidth) {
+      rewriter.replaceOpWithNewOp<LLVM::ZExtOp>(op, resultType, popCount);
+    } else {
+      rewriter.replaceOp(op, popCount.getResult());
+    }
+    return success();
+  }
+};
+
 } // namespace
 
 //===----------------------------------------------------------------------===//
@@ -76,4 +106,5 @@ void circt::populateCombToLLVMConversionPatterns(LLVMTypeConverter &converter,
   // pipeline
   patterns.add<CombParityOpConversion>(patterns.getContext(), converter);
   patterns.add<CombReverseOpConversion>(converter);
+  patterns.add<CombPopcountOpConversion>(converter);
 }

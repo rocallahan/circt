@@ -64,3 +64,11 @@ func.func @parity(%arg0: i4) -> i1 {
   %0 = comb.parity %arg0 : i4
   return %0 : i1
 }
+
+// CHECK-LABEL: func.func @popcount
+func.func @popcount(%arg0: i4) -> i3 {
+  // CHECK-NOT: comb.popcount
+  // CHECK: synth.aig.and_inv
+  %0 = comb.popcount %arg0 : (i4) -> i3
+  return %0 : i3
+}

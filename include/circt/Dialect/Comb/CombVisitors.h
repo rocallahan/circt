@@ -38,7 +38,7 @@ public:
             // Reduction Operators
             ParityOp,
             // Other operations.
-            ConcatOp, ReplicateOp, ExtractOp, MuxOp, ReverseOp>(
+            ConcatOp, ReplicateOp, ExtractOp, MuxOp, ReverseOp, PopcountOp>(
             [&](auto expr) -> ResultType {
               return thisCast->visitComb(expr, args...);
             })
@@ -105,6 +105,7 @@ public:
   HANDLE(ExtractOp, Unhandled);
   HANDLE(MuxOp, Unhandled);
   HANDLE(ReverseOp, Unary);
+  HANDLE(PopcountOp, Unary);
 #undef HANDLE
 };
 

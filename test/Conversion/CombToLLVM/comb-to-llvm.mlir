@@ -103,6 +103,23 @@ func.func @test_comb_reverse(%arg0: i32) -> i32 {
   return %0 : i32
 }
 
+// CHECK-LABEL: llvm.func @test_comb_popcount
+func.func @test_comb_popcount(%arg0: i32) -> i32 {
+  // CHECK: %[[CTPOP:.*]] = llvm.intr.ctpop(%arg0) : (i32) -> i32
+  // CHECK: llvm.return %[[CTPOP]]
+  %0 = comb.popcount %arg0 : (i32) -> i32
+  return %0 : i32
+}
+
+// CHECK-LABEL: llvm.func @test_comb_popcount_resize
+func.func @test_comb_popcount_resize(%arg0: i16) -> i32 {
+  // CHECK: %[[CTPOP:.*]] = llvm.intr.ctpop(%arg0) : (i16) -> i16
+  // CHECK: %[[EXT:.*]] = llvm.zext %[[CTPOP]] : i16 to i32
+  // CHECK: llvm.return %[[EXT]]
+  %0 = comb.popcount %arg0 : (i16) -> i32
+  return %0 : i32
+}
+
 // CHECK-LABEL: llvm.func @test_comb_shifts
 func.func @test_comb_shifts(%arg0: i32, %arg1: i32) -> (i32, i32, i32) {
   // Test shift operations (converted via Comb->Arith->LLVM)

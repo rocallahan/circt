@@ -395,6 +395,9 @@ void ConvertCombToArithPass::runOnOperation() {
   target.addLegalOp<comb::ParityOp>();
   // Arith does not have bitreverse, so we leave it for the CombToLLVM pass.
   target.addLegalOp<comb::ReverseOp>();
+  // Arith does not have popcount, so we leave it for the CombToLLVM pass.
+  target.addLegalOp<comb::PopcountOp>();
+
   // This pass is intended to rewrite Comb ops into Arith ops. Other dialects
   // (e.g. LLVM) may legitimately be present when this pass is used in custom
   // pipelines. Treat all unknown operations as legal so we don't attempt to
